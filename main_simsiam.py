@@ -113,17 +113,17 @@ def main():
     args.distributed = args.world_size > 1 or args.multiprocessing_distributed
 
     ngpus_per_node = torch.cuda.device_count()
+    
     if args.multiprocessing_distributed:
-        # Since we have ngpus_per_node processes per node, the total world_size
-        # needs to be adjusted accordingly
+        # 如果使用分布式多进程训练
+        # 由于每个节点有 ngpus_per_node 个进程，因此总 world_size 需要相应地调整
         args.world_size = ngpus_per_node * args.world_size
-        # Use torch.multiprocessing.spawn to launch distributed processes: the
-        # main_worker process function
+        # 使用 torch.multiprocessing.spawn 来启动分布式进程，传入参数：main_worker 函数和参数列表 args
         mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
     else:
-        # Simply call main_worker function
+        # 如果不使用分布式多进程训练
+        # 直接调用 main_worker 函数，传入参数：args.gpu, ngpus_per_node, args
         main_worker(args.gpu, ngpus_per_node, args)
-
 
 def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
